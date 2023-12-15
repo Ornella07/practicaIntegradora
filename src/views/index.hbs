@@ -1,0 +1,25 @@
+<div class='mx-3'>
+  <h1>
+    Productos
+  </h1>
+  <div class='formulario'>
+  <div class='column' id='cardContainer'>
+        {{#each productos}}
+      <div class='formu' style='width: 18rem; border: 1px solid #ccc; margin: 10px; padding: 10px;'>
+          <img src="{{this.imagen}}" class='card-img' alt="{{titulo}}"  />
+          <div class='card-body'>
+              <div style='display: flex; align-items: center;'>
+                  <h5 style='margin-right: 5px;'>{{this.titulo}}</h5>
+                  <small style='color: #6c757d;'>${{this.precio}}</small>
+              </div>
+              <h4 style='color: #485c5f; margin-top: 5px;'>Categoria: {{this.categoria}}</h4>
+              <h4 style='color: #333c3d;'>Id: {{this.id}}</h4>
+              <p style='margin-top: 10px;'>{{this.descipcion}} <span style='color: #6c757d;'>Stock: {{this.stock}}</span></p>
+          </div>
+      </div>
+    {{/each}}
+
+  </div>
+</div>
+
+<script type="module" src="/src/public/main.js"></script>
