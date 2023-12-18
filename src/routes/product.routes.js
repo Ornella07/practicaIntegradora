@@ -1,11 +1,12 @@
 import { Router } from "express";
 import productDao from "../daos/dbManager/product.dao.js";
+import { productModel } from "../models/product.model.js";
 
 const productosDao = new productDao();
 
 const productRouter = Router();
 
-productRouter.get("/", async (req, res) => { //! FUNCIONA
+productRouter.get("/", async (req, res) => { 
     try {
         res.send({
         status: 200,
@@ -18,24 +19,21 @@ productRouter.get("/", async (req, res) => { //! FUNCIONA
         })
     }
 })
+
 productRouter.post("/", async (req, res) => { //! FUNCIONA... YA NO
     try {
-        // const createProduct =  await productDao.createProduct(req.body);
-        // const allProducts = await productDao.getAllProducts()
-          
-        //   res.render('products', { products: allProducts });
         res.send({
-        status: 200,
-        payload: await productosDao.createProduct(req.body)
-    })
-}
+            status: 200,
+            payload: await productosDao.createProduct(req.body)
+    })}
     catch(err) {
         res.send({
             status: 400,
-            payload: err
+            payload: "No se pudo agregar"
         })
     }
 })
+
 productRouter.delete("/:id", async(req, res)=>{ //! FUNCIONA
     try{
         const productId = req.params.id;
@@ -52,3 +50,8 @@ productRouter.delete("/:id", async(req, res)=>{ //! FUNCIONA
     }
 })
 export default productRouter
+
+
+
+
+

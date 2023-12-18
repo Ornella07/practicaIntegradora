@@ -8,6 +8,7 @@ import handlebars from "express-handlebars";
 //Routes
 import productRouter from "./routes/product.routes.js";
 import viewsRouter from "./routes/views.routes.js";
+import cartRouter from "./routes/cart.routes.js";
 
 const port = 5000;
 const app = express();
@@ -16,12 +17,14 @@ const app = express();
 app.use(express.json())
 app.use(express.urlencoded({extended: true}))
 
-app.use(express.static('public'))
-app.use('/static', express.static('public'))
+// app.use(express.static('public'))
+// app.use('/static', express.static('public'))
 app.use(express.static(_dirname + 'public'))
+
 
 //Rutas
 app.use("/api/products", productRouter)
+app.use("/api/cart", cartRouter )
 app.use("/", viewsRouter)
 
 //Handlebars
@@ -30,17 +33,17 @@ app.engine('hbs', handlebars.engine(
         extname: ".hbs",
         defaultLayout: "main"
     }
-))
+));
+
 app.set("view engine", "hbs")
 app.set("views", _dirname + "/views")
 
-
 //Mongoose
-mongoose.connect('mongodb+srv://OrneSereno:@cluster0.fowy4qs.mongodb.net/?retryWrites=true&w=majority')
+mongoose.connect('mongodb+srv://OrneSereno:Sarasa0801@cluster0.fowy4qs.mongodb.net/?retryWrites=true&w=majority')
 .then(() => console.log("Conectado a DB"))
 .catch((err) => console.log(err))
 
 //Iniciar
 app.listen(port, () => {
     console.log(`Se Inicio el servidor ${port}`)
-})
+});
