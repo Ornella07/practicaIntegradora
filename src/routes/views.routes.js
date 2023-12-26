@@ -14,13 +14,15 @@ const messageDao = new messagesDao();
 viewsRouter.get("/", async (req, res) => { //!FUNCIONA
   res.render("index", {
     productos: await productoDao.getAllProducts(),
-    fileCss: 'style.css'
+    fileCss: 'css/style.css'
   });
 });
 
 viewsRouter.get("/messages", (req,res)=>{
-  res.render("message", {title:'Ingreso de mensaje'});
-  fileCss: 'style.css';
+  res.render("message", {
+    title:'Ingreso de mensaje',
+    fileCss: 'css/style.css'
+  })  
 })
 
 

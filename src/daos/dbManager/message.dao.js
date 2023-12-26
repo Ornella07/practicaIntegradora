@@ -1,15 +1,18 @@
 import { messageModel } from "../../models/message.model.js";
 
-class messageDao{
+class MessageDao{
     constructor(){
         this.messages = [];
     }
-    obtenerMensaje(){
+    getAllMessages(){
         return this.messages;
     }
-    agregarMensaje(){
+    addMessage(){
         this.messages.push(message);
+    }
+    mostrarMensaje(message){
+        console.log(message)
     }
 }
 
-export default messageDao;
+export default MessageDao;

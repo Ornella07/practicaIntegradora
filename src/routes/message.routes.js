@@ -1,16 +1,17 @@
 import { Router } from "express"; 
-import messageDao from "../daos/dbManager/message.dao.js";
+import MessageDao from "../daos/dbManager/message.dao.js";
 
 const messageRouter = Router();
+const messagesDao = new MessageDao();
 
 messageRouter.get('/messages', (req, res) => {
-    const messages = messageDao.getAllMessages();
+    const messages = messagesDao.getAllMessages();
     res.json(messages);
   });
   
   messageRouter.post('/messages', (req, res) => {
     const message = req.body.message;
-    messageDao.addMessage(message);
+    messagesDao.addMessage(message);
     io.emit('chat message', message); // Emitir el mensaje a todos los clientes conectados
     res.sendStatus(200);
   });
@@ -18,12 +19,12 @@ messageRouter.get('/messages', (req, res) => {
 //? Mostrar el mesanje por pantalla
 messageRouter.get('/messages/:id', async(req, res)=>{
     try {
-        const mensaje = await messageDao.obtenerMensaje(req.params.id);
+        const message = await messagesDao.getAllMessages(req.params.id);
 
-        if(!mensaje){
+        if(!message){
             return res.status(404).json({error: 'Mensaje no encontrado'})
         }
-        messageDao.mostrarMensaje(mensaje)
+        messagesDao.mostrarMensaje(message)
     } catch (error) {  
         console.error('Error en la ruta para mostrar el mensaje',error);
         res.status(500).json({error:'Error interno al servidor'});

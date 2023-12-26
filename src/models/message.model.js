@@ -7,4 +7,4 @@ const messageSchema = new Schema({
 
 const messageModel = model("message", messageSchema);
  
-export {messageModel}
+export { messageModel} 

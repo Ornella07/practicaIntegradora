@@ -73,6 +73,6 @@ mongoose.connect('mongodb+srv://OrneSereno:Sarasa0801@cluster0.fowy4qs.mongodb.n
 .catch((err) => console.log(err))
 
 //Iniciar
-app.listen(port, () => {
+server.listen(port, () => {
     console.log(`Se Inicio el servidor ${port}`)
 });
