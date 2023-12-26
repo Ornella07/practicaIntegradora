@@ -2,21 +2,28 @@ import { cartModel } from "../../models/cart.model.js";
 
 class cartDao {
     constructor() { this.model = cartModel }
-
-    async getAllProducts(){
+    //!obtengo todos los productos
+    async getCarts(){
         return await this.model.find().lean();
     }
+    //!Creo un carrito
+    async getCreateCart(cart){
+        return await this.model.create(cart);
+    }
+    //!Obtengo un carrtio especifico
     async getCartById(id){
         return await this.model.findById(id);
     }
-    async createCart(product){
-        return await this.model.create(product);
+    //! Actualizo un carrito existente, tomando su ID...
+    async updateCart(id, cart){
+        return await this.model.findByIdAndUpdate(id, cart);
     }
-    async updateProduct(id, product){
-        return await this.model.findByIdAndUpdate(id, product);
-    }
-    async deleteProduct(id){
+    //!Elimino un carrito por ID
+    async deleteCart(id){
         return await this.model.findByIdAndDelete(id);
     }
 }
-export default cartDao;
+
+const daoCart = new cartDao();
+
+export default daoCart;

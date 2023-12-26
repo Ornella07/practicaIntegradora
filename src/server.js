@@ -25,7 +25,7 @@ app.use(express.urlencoded({extended: true}))
 
 // app.use(express.static('public'))
 // app.use('/static', express.static('public'))
-app.use(express.static(_dirname + 'public'))
+app.use(express.static(_dirname + '/public'))
 
 
 //Rutas
