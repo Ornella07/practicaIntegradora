@@ -13,9 +13,9 @@ import cartRouter from "./routes/cart.routes.js";
 import messageRouter from "./routes/message.routes.js";
 import { createServer } from 'node:http';
 
-const port = 5000;
+const port = 5001;
 const app = express();
-const server = createServer(app)
+const server = createServer(app);
 const io = new Server(server);
 
 
@@ -53,15 +53,16 @@ const messages = [];
 io.on("connection", (socket) => {
   console.log("Nuevo usuario conectado");
 
-  socket.on("message", (data) => {
-    console.log(data);
-    messages.push(data);
+  socket.on("messages", (msg) => {
+    
+    console.log(msg);
+    messages.push(msg);
     io.emit("messages", messages);
   });
 
- io.on("inicio", (data) => {
+ io.on("inicio", (msg) => {
     io.emit("messages", messages);
-    socket.broadcast.emit("connected", data);
+    socket.broadcast.emit("connected", msg);
   });
 
   socket.emit("messages", messages);

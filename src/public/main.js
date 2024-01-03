@@ -11,22 +11,29 @@ document.addEventListener("DOMContentLoaded", () => {
     const socket = io();
 
 //?Enviar Mensaje mediante Chat
-form.addEventListener('submit', (e)=> {
+form.addEventListener('submit', (e) => {
     e.preventDefault();
     const message = input.value.trim();
-    if(message !== ''){
-        socket.emit('Chat Message', message);
+    console.log('Enviando mensaje:', message);
+
+    if (message !== '') {
+        socket.emit('message', message);
         input.value = '';
     }
 });
 
-
-
-
-socket.on('chat message', (msg) => {
+socket.on('message', (msg) => {
     const item = document.createElement('li');
     item.textContent = msg;
     messages.appendChild(item);
     window.scrollTo(0, document.body.scrollHeight);
-    });
+});
+
+// socket.on('message', (msg) => {
+//     console.log('Mensaje recibido:',msg)
+//     const item = document.createElement('li');
+//     item.textContent = msg;
+//     messages.appendChild(item);
+//     window.scrollTo(0, document.body.scrollHeight);
+//     });
 });
