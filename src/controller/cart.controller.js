@@ -1,158 +1,95 @@
-import { cartServices } from "#services/factory.js";
+import { cartService } from '../services/carts.services.js';
 
-const getCartByUserIdController = async (req, res) => {
-  const { uid } = req.params;
 
-  try {
-    const cartSelected = await cartServices.getCartByUserId(uid);
-    res.status(200).json({ cartSelected: cartSelected });
-  } catch (e) {
-    res.status(404).json({ error: e.message });
-  }
+//Crea un nuevo carrito para un usuario.
+export const createCartController = async (req, res) => {
+    // Obtiene el userID del token decodificado
+    const userID = req.user.id;
+    const newCart = await cartService.createCart(userID);
+    res.status(201).json(newCart);
 };
 
-const createCartController = async (req, res) => {
-  const { products, userId } = req.body;
 
-  const productMap = products.map((p) => {
-    return {
-      productId: p,
-      quantity: 1,
-    };
-  });
-
-  if (!products || !Array.isArray(products)) {
-    return res.status(400).json({
-      error: "Please send an array of products to create your cart.",
-    });
-  } else {
-    const newCart = await cartServices.createCart(productMap, userId);
-
-    res
-      .status(200)
-      .json({ message: "Successfully created!", cartCreated: newCart });
-  }
+//Obtiene un carrito por su ID.
+export const getCartByIdController = async (req, res) => {
+    const cartId = req.params.cid;
+    const cart = await cartService.getCartById(cartId);
+    res.json(cart);
 };
 
-const getCartByCartIdController = async (req, res) => {
-  const { cid } = req.params;
 
-  try {
-    const cartSelected = await cartServices.getCartByCartId(cid);
-    res.status(200).json({ cartSelected: cartSelected });
-  } catch (e) {
-    res.status(404).json({ error: e.message });
-  }
+// Actualiza un carrito existente con un nuevo array de productos.
+export const updateCartController = async (req, res) => {
+    const { cid } = req.params;
+    const cart = req.body; // req.body es el nuevo array de productos
+    const respuesta = await cartService.updateCart(cid, cart);
+    res.json({ status: 'Carrito actualizado', cart: respuesta });
 };
 
-const updateCartController = async (req, res) => {
-  const { cid } = req.params;
-  const { products } = req.body;
 
-  const productMap = products.map((p) => {
-    return {
-      productId: p,
-      quantity: 1,
-    };
-  });
-
-  if (!products || !Array.isArray(products)) {
-    return res.status(400).json({
-      error: "Please send an array of products to create your cart.",
-    });
-  }
-
-  try {
-    await cartServices.updateCart(cid, productMap);
-    res.status(200).json({ message: "Product updated successuflly" });
-  } catch (error) {
-    res.status(400).json({ error });
-  }
+//Añade un producto a un carrito existente.
+export const addProductToCartController = async (req, res) => {
+    const cartID = req.params.cid;
+    const productID = req.params.pid;
+    const product = { product: productID, quantity: 1 };
+    const updatedCart = await cartService.addProductToCart(cartID, product);
+    res.status(200).json(updatedCart);
 };
 
-const cleanCartByCartIdController = async (req, res) => {
-  const { cid } = req.params;
-
-  try {
-    await cartServices.cleanCartByCartId(cid);
-    res.status(200).json({ message: "Cart empty successfully" });
-  } catch (error) {
-    res.status(404).json({ error: error.message });
-  }
+// Elimina un producto de un carrito
+export const removeProductFromCartController = async (req, res) => {
+    const { cid, pid } = req.params;
+    const respuesta = await cartService.removeProductFromCart(cid, pid);
+    res.json({ status: 'Producto eliminado del carrito' });
 };
 
-const addProductByCartIdController = async (req, res) => {
-  const { cid, pid } = req.params;
-
-  try {
-    await cartServices.addProductByCartId(cid, pid);
-    res.status(200).json({ message: "New product has added!" });
-  } catch (e) {
-    res.status(400).json({ error: e.message });
-  }
+//Elimina todos los productos de un carrito
+export const deleteWholeCartController = async (req, res) => {
+    const { cid } = req.params;
+    const respuesta = await cartService.deleteWholeCart(cid);
+    res.json({ status: 'Todos los productos eliminados del carrito' });
 };
 
-const postPaymentController = async (req, res) => {
-  const { cid } = req.params;
-
-  try {
-    let result = await cartServices.postPayment(cid);
-
-    if (result.ticket !== null) {
-      res.status(200).json({
-        message: "Payment successufully",
-        productsBuy: result.productBought,
-        ticket: result.ticket,
-        productsLeft: result.nonShopProducts,
-        hasNewCart: result.hasNewCart,
-        buyCart: result.buyCart,
-      });
-    } else {
-      res.status(404).json({
-        message: "Payment failed",
-        productsBuy: result.productBought,
-        ticket: result.ticket,
-        productsLeft: result.nonShopProducts,
-        hasNewCart: result.hasNewCart,
-        buyCart: result.buyCart,
-      });
+//purchaseCartController
+export const purchaseCartController = async (req, res) => {
+    const cartId = req.params.cid;
+    const productsFromCart = await getProductsFromCartById(cartId);
+    const { validProducts, invalidProducts } = evaluateStock(productsFromCart);
+    let grandTotal = 0;
+    for (const product of validProducts) {
+        grandTotal += product.productId.price * product.quantity;
+        const reqs = { cid: cartId, pid: product.productId };
+        await deleteProductFromCartByIdController(reqs, res);
     }
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
+    if (validProducts.length > 0) {
+        const ticket = { amount: grandTotal, purchaser: req.session.user.username };
+        const createdTicket = await createTicket(ticket, res);
+    }
 };
 
-const updateQuantityProductController = async (req, res) => {
-  const { cid, pid } = req.params;
-  const { quantity } = req.body;
+function evaluateStock(productsFromCart) {
+    const validProducts = [];
+    const invalidProducts = [];
+    productsFromCart.forEach((product) => {
+        if (product.quantity <= product.productId.stock) {
+            validProducts.push(product);
+        } else {
+            invalidProducts.push(product);
+        }
+    });
+    return { validProducts, invalidProducts };
+}
 
-  try {
-    await cartServices.updateQuantityProduct(cid, pid, quantity);
-    res.status(200).json({ message: "Quantity successufully updated" });
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
-};
+async function getProductsFromCartById(cartId) {
+    const cart = await cartService.getCartById(cartId);
+    return cart.products;
+}
 
-const deleteProductByCartIdController = async (req, res) => {
-  const { cid, pid } = req.params;
-
-  try {
-    await cartServices.deleteProductByCartId(cid, pid);
-    res.status(200).json({ message: "Product removed successfully" });
-  } catch (error) {
-    res.status(404).json({ error: error.message });
-  }
-};
-
-export {
-  getCartByUserIdController,
-  createCartController,
-  getCartByCartIdController,
-  updateCartController,
-  cleanCartByCartIdController,
-  addProductByCartIdController,
-  postPaymentController,
-  updateQuantityProductController,
-  deleteProductByCartIdController,
+export const updateProductQuantityInCartController = async (req, res) => {
+    const cartID = req.params.cid;
+    const productID = req.params.pid;
+    const quantity = req.body.quantity;
+    const product = { product: productID, quantity: quantity };
+    const updatedCart = await cartService.updateProductQuantityInCart(cartID, product);
+    res.status(200).json(updatedCart);
 };
