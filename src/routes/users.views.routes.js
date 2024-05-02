@@ -1,20 +1,14 @@
 import { Router } from 'express';
+import {getAllUsers, updateUser, deleteUser, getUser } from '../controllers/user.controller.js';
 
 const router = Router();
 
+router.get('/', getAllUsers);
 
-router.get("/login", (req, res) => {
-    res.render('login')
-})
+router.get('/:uid', getUser);
 
-router.get("/register", (req, res) => {
-    res.render('register')
-})
+router.put('/:uid', updateUser);
 
-router.get("/", (req, res) => {
-    res.render('profile', {
-        user: req.session.user
-    })
-})
+router.delete('/:uid', deleteUser);
 
 export default router;
